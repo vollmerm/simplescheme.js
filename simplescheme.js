@@ -47,7 +47,7 @@ root_env.add('car', function(x) { return x[0] });
 root_env.add('cdr', function(x) { return x.slice(1) });
 root_env.add('cons', function(x,y) { y.splice(0,0,x); return y; });
 root_env.add('length', function(x) { x.length });
-root_env.add('null?', function(x) { x == null });
+root_env.add('null?', function(x) { !x });
 
 is_value = function(s)
 {
@@ -155,7 +155,6 @@ get_tokens = function(str)
   // the first that popped into my head: I create a buffer and add characters
   // to it until I hit whitespace or the end of the string.
   var token_buf = '';
-  var number_buf = null;
   while (index < str.length)
   {
     if (str[index] == '(')
@@ -169,28 +168,29 @@ get_tokens = function(str)
     {
       // time to add the buffers to the token array
       if (token_buf)
-        tokens.push(token_buf);
-      else if (number_buf)
-        tokens.push(number_buf);
+      {
+        var new_token = token_buf;
+        if (is_number(new_token))
+          new_token = Number(new_token);
+        tokens.push(new_token);
+      }
       token_buf = '';
       number_buf = null;
     }
     else
     {
-      if (is_number(str[index]))
-      {
-        if (number_buf == null) number_buf = 0;
-        number_buf = (number_buf * 10) + Number(str[index]);
-      } else 
-        token_buf = token_buf.concat(str[index]);
+      token_buf = token_buf.concat(str[index]);
     }
     index++;
   }
   // add any remaining characters from the buffer
   if (token_buf)
-    tokens.push(token_buf);
-  else if (number_buf)
-    tokens.push(number_buf);
+  {
+    var new_token = token_buf;
+    if (is_number(new_token))
+      new_token = Number(new_token);
+    tokens.push(new_token);
+  }
   // return the token array
   return tokens;
 }
@@ -198,7 +198,7 @@ get_tokens = function(str)
 parse = function(str)
 {
   // pass each statement to eval and return output
-  var tokens = get_tokens(str);
+  var tokens = get_tokens(str.replace(/^\s+|\s+$/g, '').replace(/(\r\n|\n|\r)/gm,""));
   var output = [];
   for (var i = 0; i < tokens.length; i++)
   {
