@@ -8,6 +8,23 @@ Usage
 
 Pass LISP code to the parse() function to eval it, or pass LISP-like code in Javascript array form to the eval function directly.
 
+So this:
+
+```scheme
+(define fact (lambda (n)
+  (if (<= n 1) 1
+      (* n (fact (- n 1))))))
+
+(fact 10) ; 3628800
+```
+
+Becomes this:
+
+```javascript
+parse('(define fact (lambda (n) (if (<= n 1) 1 (* n (fact (- n 1))))))(fact 10)');
+// 3629900
+```
+
 Implementation details
 ----------------------
 
