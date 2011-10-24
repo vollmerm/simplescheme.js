@@ -1,3 +1,7 @@
+// hash.js
+// Author: Rick Measham (aka Woosta) 
+// URL: http://rick.measham.id.au/javascript/hash.htm
+// LICENSE: GPL or same terms as Perl
 
 function Hash(){
 	for( var i=0; i < arguments.length; i++ )
@@ -18,7 +22,7 @@ Hash.prototype.keys = function(){
 	for( var n in this )
 		if( this.hasOwnProperty(n) )
 			rv.push(n);
-			return rv;
+	return rv;
 }
 
 Hash.prototype.length = function(){
@@ -30,7 +34,7 @@ Hash.prototype.values = function(){
 	for( var n in this )
 		if( this.hasOwnProperty(n) )
 			rv.push(this[n]);
-			return rv;
+	return rv;
 }
 
 Hash.prototype.slice = function(){

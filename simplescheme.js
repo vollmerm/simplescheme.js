@@ -52,6 +52,8 @@ root_env.add('null?', function(x) { x == null });
 is_value = function(s)
 {
 	return (typeof(s) == 'number');
+	// the typeof function in JS is confusing sometimes. at least it works
+	// predictably for numbers (kind-of)
 }
 
 // eval function
@@ -118,6 +120,8 @@ eval = function(x, env)
 		for (var i = 0; i < x.length; i++) // eval each item in list
 			evaluated_elements[i] = (eval(x[i],env));
 		// call function with apply
+		// this would be a good place to try to catch errors if
+		// I weren't so lazy
 		return evaluated_elements[0].apply(null,evaluated_elements.slice(1));
 	}
 }
@@ -144,6 +148,12 @@ get_tokens = function(str)
 	// for nested parenthesis
 	var index = 0;
 	var tokens = [];
+	// some of the input will obviously consist of more than a single
+	// character, so I had to somehow construct strings/numbers in the
+	// token array despite processing the string character by character.
+	// I'm sure there are lots of better solutions out there but this was
+	// the first that popped into my head: I create a buffer and add characters
+	// to it until I hit whitespace or the end of the string.
 	var token_buf = '';
 	var number_buf = null;
   while (index < str.length)
