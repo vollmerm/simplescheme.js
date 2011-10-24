@@ -54,3 +54,15 @@ Extending
 ---------
 
 Adding new primitive functions is fairly simple -- javascript functions can be inserted directly into the global scope by calling root_env.add(name,function).
+
+Sources
+-------
+
+These sources were useful to me while implementing simplescheme.js.
+
+ * http://mitpress.mit.edu/sicp/
+ * http://www.cs.sjsu.edu/~louden/pltext3.html
+ * http://onestepback.org/index.cgi/Tech/Ruby/LispInRuby.red
+ * http://norvig.com/lispy.html
+ * http://rick.measham.id.au/javascript/hash.htm
+ * https://developer.mozilla.org/en/JavaScript/Reference
