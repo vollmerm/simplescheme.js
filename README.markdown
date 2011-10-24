@@ -25,14 +25,23 @@ parse('(define fact (lambda (n) (if (<= n 1) 1 (* n (fact (- n 1))))))(fact 10)'
 // 3629900
 ```
 
+And Javascript arrays can be eval'd directly:
+
+```javascript
+eval(['+',1,['*',3,4]]);
+// 13
+```
+
 Implementation details
 ----------------------
 
-simplescheme.js is primarily built around a single eval() function. It takes two parameters: an expression (in the form of a Javascript array) and an environment (in the form of a Context object). Context objects use a hash table for local values and variables, and a linked list in the form of Context.parent_context links a Context object to its parent(s). This way, an attempt to look up a given value will first check the immediate or local context, then check the one directly above it, and so on, all the way back down to the global context.
+simplescheme.js is primarily built around a single eval() function. It takes two parameters: an expression (in the form of a Javascript array) and an environment (in the form of a Context object). Context objects use a hash table for local values and variables, and a linked list containing its parent(s). This way, an attempt to look up a given value will first check the immediate or local context, then check the one directly above it, and so on, all the way back down to the global context.
 
 Javascript supports higher order functions, which greatly simplified the implementation of LISP's lambda functions. To create a lambda function, I created a Javascript function that defined a new context (where the arguments are mapped to the function signature's parameters and added to the local context) and passes it to eval along with its expression.
 
 Eval has a few base cases (if statement, define, lambda, self-evaluating value, etc). If none of these are the case, then it assumes that the expression is in the form of (function *parameters) and attempts to call it. If you get a weird Javascript error about apply not being a valid function, it's probably because you passed a list to eval that it didn't understand, so it tried to call the first element as a function.
+
+To build the context objects I used an [existing hash table script](http://rick.measham.id.au/javascript/hash.htm). It's very simple and elegent, and it's open source, so I decided to use it rather than implement my own.
 
 Progress
 --------
