@@ -28,7 +28,7 @@ parse('(define fact (lambda (n) (if (<= n 1) 1 (* n (fact (- n 1))))))(fact 10)'
 And Javascript arrays can be eval'd directly:
 
 ```javascript
-eval(['+',1,['*',3,4]]);
+eval_l(['+',1,['*',3,4]]);
 // 13
 ```
 

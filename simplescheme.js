@@ -58,7 +58,7 @@ is_value = function(s)
 
 // eval function
 // called with an expression and an optional environment (a Context object)
-eval = function(x, env)
+eval_l = function(x, env)
 {
   if (!env) // if not set default to root_env
     env = root_env;
@@ -82,7 +82,7 @@ eval = function(x, env)
       local_context.parent_context = env;
       for (i = 0; i < arguments.length; i++)
         local_context.add(params[i],arguments[i]);
-      return eval(exp, local_context);
+      return eval_l(exp, local_context);
     }
     return new_func; // return higher order function
   }
@@ -92,33 +92,33 @@ eval = function(x, env)
     var cond = x[1];
     var doexp = x[2];
     var elseexp = x[3];
-    if (eval(cond, env))
-      return eval(doexp, env);
+    if (eval_l(cond, env))
+      return eval_l(doexp, env);
     else
-      return eval(elseexp, env);
+      return eval_l(elseexp, env);
   }
   else if (x[0] == 'set!' || x[0] == 'define')
   {
     // lazy hack: set! and define have identical behavior here
-    env.add(x[1], eval(x[2],env));
+    env.add(x[1], eval_l(x[2],env));
   }
 
   else if (x[0] == 'begin')
   {
     // evaluates all expressions then returns the last one
     if (x[1].length == 1)
-      return eval(x[1],env);
+      return eval_l(x[1],env);
     before_end = x[1].slice(0,-1);
     for (i = 0; i < before_end.length; i++)
-      eval(before_end[i], env);
-    return eval(x[1][x[1].length-1],env);
+      eval_l(before_end[i], env);
+    return eval_l(x[1][x[1].length-1],env);
   }
   else
   {
     // calling a procedure!
     var evaluated_elements = new Array(x.length);
     for (var i = 0; i < x.length; i++) // eval each item in list
-      evaluated_elements[i] = (eval(x[i],env));
+      evaluated_elements[i] = (eval_l(x[i],env));
     // call function with apply
     // this would be a good place to try to catch errors if
     // I weren't so lazy
@@ -202,7 +202,7 @@ parse = function(str)
   var output = [];
   for (var i = 0; i < tokens.length; i++)
   {
-    var returned_value = eval(tokens[i]);
+    var returned_value = eval_l(tokens[i]);
     // ignore statements that return nothing
     if (returned_value) output.push(returned_value);
   }
