@@ -45,6 +45,7 @@ set_root = function()
   root_env.add('>=', function(x,y) { return x>=y });
   root_env.add('<=', function(x,y) { return x<=y });
   root_env.add('=', function(x,y) { return x==y });
+  root_env.add('%', function(x,y) { return x%y; });
   root_env.add('car', function(x) { return x[0] });
   root_env.add('cdr', function(x) { return x.slice(1) });
   root_env.add('cons', function(x,y) { y.splice(0,0,x); return y; });
