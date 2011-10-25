@@ -43,18 +43,16 @@ simplescheme.js is primarily built around a single eval() function. It takes two
 
 Javascript supports higher order functions, which greatly simplified the implementation of LISP's lambda functions. To create a lambda function, I created a Javascript function that defined a new context (where the arguments are mapped to the function signature's parameters and added to the local context) and passes it to eval along with its expression.
 
-Eval has a few base cases (if statement, define, lambda, self-evaluating value, etc). If none of these are the case, then it assumes that the expression is in the form of (function *parameters) and attempts to call it. If you get a weird Javascript error about apply not being a valid function, it's probably because you passed a list to eval that it didn't understand, so it tried to call the first element as a function.
+Eval has a few base cases (if statement, define, lambda, value, etc). If none of these are the case, then it assumes that the expression is in the form of (function *parameters) and attempts to call it. If you get a weird Javascript error about apply not being a valid function, it's probably because you passed a list to eval that it didn't understand, so it tried to call the first element as a function.
 
 To build the context objects I used an [existing hash table script](http://rick.measham.id.au/javascript/hash.htm). It's very simple and elegent, and it's open source, so I decided to use it rather than implement my own.
 
 Progress
 --------
 
-While it's usable, a lot is missing from the interpreter in its current state. 
+While it's usable, a lot is missing from the interpreter in its current state. Currently there is only very basic error checking. Numbers are the only supported type. Single-quote shortcut for quotes is not implemented -- use (quote *stuff).
 
-The built-in functions are fairly limited. The standards (cons, car, cdr, if, cond, +, -, =, quote, etc) _are_ implemented, as well as lambda functions.
-
-Currently there is only very basic error checking. Numbers are the only supported type. Single-quote shortcut for quotes and (define (f x)) syntax for functions are both not implemented -- use (define f (lambda (x) (exp))).
+Most basic Scheme functions are implemented: car, cdr, cons, list, if, cond, define, lambda, null?, and so on. A few math functions are included (stuff like cos, sin, sqrt). See the source for a complete list.
 
 Also, it's a bit buggy. It hasn't been very thoroughly tested so far.
 

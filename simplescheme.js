@@ -79,9 +79,7 @@ set_root = function()
       function ()
       {
         for (var i = 0; i < arguments.length; i++)
-        {
           if (!arguments[i]) return false;
-        }
         return true;
       }
   );
@@ -89,12 +87,10 @@ set_root = function()
       function ()
       {
         for (var i = 0; i < arguments.length; i++)
-        {
           if (arguments[i]) return true;
-        }
         return false;
       }
-  )
+  );
 }
 
 is_value = function(s)
@@ -110,13 +106,20 @@ eval_l = function(x, env)
 {
   if (!env) // if not set default to root_env
     env = root_env;
+    
+  // this is the heavy-hitter function. it goes through a bunch of possible cases
+  // by comparing the value of the first item in the list. for example: if the first
+  // item in the list is lambda, it creates a new function. if none of these cases is
+  // true, it falls back on the base case: the first element in the list is a function
+  // and the rest of the elements are arguments. if this also fails, eval_l throws an
+  // error.
   if (is_value(x))
     return x; // just a number
   else if (env.find(x) || env.find(x) == 0) // otherwise the number 0 can't be stored
     return env.find(x); // a value in the context
   else if (x[0] == 'quote')
   {
-    if (!x.slice(1)) return [];
+    if (!x.slice(1)) return []; // empty list
     else return x.slice(1); // quoted value or list
   }
   else if (x[0] == 'lambda')
@@ -127,6 +130,7 @@ eval_l = function(x, env)
     var new_func = function()
     {
       var lambda_exp = x.slice(1);
+      if (lambda_exp.length < 2) throw "lambda takes two arguments";
       var params = lambda_exp[0];
       var exp = lambda_exp[1];
       var local_context = new Context();
@@ -140,6 +144,7 @@ eval_l = function(x, env)
   else if (x[0] == 'if')
   {
     // if then else
+    if (x.slice(1).length < 3) throw "if takes three arguments";
     var cond = x[1];
     var doexp = x[2];
     var elseexp = x[3];
@@ -155,31 +160,40 @@ eval_l = function(x, env)
     {
       generate_if = function(exp)
       {
-        if (exp.length == 1) return ['if',exp[0][0],exp[0][1]];
-        else 
+        // tricky: this assumes that the last condition in cond will
+        // always be true, if we get to it.
+        if (exp.length == 1)
         {
+          if (eval_l(exp[0][0]) == '#f') throw "Last condition on cond reached, no match.";
+          return exp[0][1];
+        } else 
+        {
+          // recursively build the if statement
           var current_exp = exp.shift();
           return ['if',current_exp[0],current_exp[1],generate_if(exp)];
         }
       }
-      return eval_l(generate_if(cond_exp));
+      return eval_l(generate_if(cond_exp),env);
     } else throw 'Cond must have more than one conditions';
   }
   else if (x[0] == 'set!' || x[0] == 'define')
   {
+    if (x.slice(1).length == 0) throw "Define and set! require one or more expressions";
+    // edge case: defining a function
+    if (x[0] == 'define' && typeof(x[1]) == 'object' && x[1].length > 1)
+      return eval_l(['define',x[1][0],['lambda',x[1].slice(1),x[2]]],env);
     // lazy hack: set! and define have identical behavior here
-    env.add(x[1], eval_l(x[2],env));
+    env.add(x[1], eval_l(x[2],env));   
   }
-
   else if (x[0] == 'begin')
   {
-    // evaluates all expressions then returns the last one
-    if (x[1].length == 1)
-      return eval_l(x[1],env);
-    before_end = x[1].slice(0,-1);
-    for (i = 0; i < before_end.length; i++)
-      eval_l(before_end[i], env);
-    return eval_l(x[1][x[1].length-1],env);
+    // run a list of expressions in sequence and return the value returned by the last one
+    var expressions = x.slice(1);
+    if (expressions.length == 0) throw "Begin takes one or more expressions";
+    var returned;
+    for (var i = 0; i < expressions.length; i++)
+      returned = eval_l(expressions[i],env);
+    return returned;
   }
   else
   {
@@ -191,11 +205,12 @@ eval_l = function(x, env)
     // call function with apply
     if (typeof(evaluated_elements[0]) == 'function')
     {
+      // verify that it's a function, then apply it
       var returned_value = evaluated_elements[0].apply(null,evaluated_elements.slice(1));
       if (typeof(returned_value) == 'boolean')
-        return (returned_value ? '#t' : '#f');
+        return (returned_value ? '#t' : '#f'); // returning actual true or false breaks stuff
       else
-        return returned_value;
+        return returned_value; // anything other than boolean can be returned directly
     } else // probably something wrong
       throw 'Not sure what to do with input \'' + x[0] + '\'';
   }
@@ -249,8 +264,8 @@ get_tokens = function(str)
           new_token = Number(new_token);
         tokens.push(new_token);
       }
+      // reset the buffer
       token_buf = '';
-      number_buf = null;
     }
     else
     {
@@ -272,7 +287,7 @@ get_tokens = function(str)
 
 parse = function(str)
 {
-  set_root();
+  set_root(); // clear environment on each parse
   // pass each statement to eval and return output
   var tokens;
   try {
@@ -282,12 +297,14 @@ parse = function(str)
   for (var i = 0; i < tokens.length; i++)
   {
     var returned_value;
+    // rudimentary error checking -- this try/catch block is mainly for catching
+    // the javascript errors rather than sending them to FireBug
     try { returned_value = eval_l(tokens[i]); }
     catch(e) { returned_value = e; }
     // ignore statements that return nothing
     if (returned_value) output.push(returned_value);
   }
-  return output;
+  return output; // array of output values
 }
 
 function is_number(n)
