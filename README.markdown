@@ -50,7 +50,7 @@ To build the context objects I used an [existing hash table script](http://rick.
 Progress
 --------
 
-While it's usable, a lot is missing from the interpreter in its current state. Currently there is only very basic error checking. Numbers are the only supported type. Single-quote shortcut for quotes is not implemented -- use (quote *stuff).
+While it's usable, a lot is missing from the interpreter in its current state. Currently there is only very basic error checking. Numbers are the only supported type.
 
 Most basic Scheme functions are implemented: car, cdr, cons, list, if, cond, define, lambda, null?, and so on. A few math functions are included (stuff like cos, sin, sqrt). See the source for a complete list.
 

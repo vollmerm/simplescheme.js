@@ -285,13 +285,37 @@ get_tokens = function(str)
   return tokens;
 }
 
+find_single_quotes = function(str)
+{
+  var index = 0;
+  while (index < str.length)
+  {
+    if (str[index] == "'")
+    {
+      if (str[index+1] == "(" && str[index+2] == ")")
+      {
+        str = str.slice(0,index) +str.slice(index+1);
+        str = str.slice(0,index+1) + 'quote' + str.slice(index+1);
+      } else
+      {
+        str = str.slice(0,index) + str.slice(index+1);
+        str = str.slice(0,index+1) + 'quote ' + str.slice(index+1);
+      }
+    }
+    index++;
+  }
+  return str;
+}
+
 parse = function(str)
 {
   set_root(); // clear environment on each parse
   // pass each statement to eval and return output
   var tokens;
   try {
-    tokens = get_tokens(str.replace(/;.*$|;.*[\n\r$]/g,'').replace(/^\s+|\s+$/g, '').replace(/(\r\n|\n|\r)/gm,""));
+    tokens = get_tokens(find_single_quotes(str).replace(/;.*$|;.*[\n\r$]/g,'')
+                                               .replace(/^\s+|\s+$/g, '')
+                                               .replace(/(\r\n|\n|\r)/gm,""));
   } catch(e) { return e; }
   var output = [];
   for (var i = 0; i < tokens.length; i++)

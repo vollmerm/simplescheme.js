@@ -93,14 +93,14 @@ $(function() {
          (#t (cons (proc (car lis))
                    (map-func proc (cdr lis))))))
 (define (square x) (* x x))
-(map-func square (quote 2 3 4))
+(map-func square '(2 3 4))
 
 ; compute length of a list
 (define len (lambda (L)
   (if (null? L) 0
       (+ 1 (len (cdr L))))))
 
-(len (quote 1 2 3))
+(len '(1 2 3))
 (len (quote 1 2 3 (4 5)))
 
 
