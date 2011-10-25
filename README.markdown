@@ -3,6 +3,8 @@ simplescheme.js
 
 This is a very simple LISP interpreter implemented in Javascript. I started working on this for fun and to help me study for my programming languages class.
 
+You can demo the interpreter with this [rudimentary web interface](http://gaia.ecs.csus.edu/~vollmerm/simplescheme.js/).
+
 Usage
 -----
 
@@ -45,6 +47,8 @@ To build the context objects I used an [existing hash table script](http://rick.
 
 Progress
 --------
+
+While it's usable, a lot is missing from the interpreter in its current state. 
 
 The built-in functions are fairly limited. The standards (cons, car, cdr, if, +, -, =, quote, etc) _are_ implemented, as well as lambda functions.
 
