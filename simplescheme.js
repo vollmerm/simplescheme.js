@@ -122,25 +122,6 @@ eval_l = function(x, env)
     if (!x.slice(1)) return []; // empty list
     else return x.slice(1); // quoted value or list
   }
-  else if (x[0] == 'lambda')
-  {
-    // construct a new function by creating a local scope
-    // and defining the passed values in it, then passing
-    // that to eval
-    var new_func = function()
-    {
-      var lambda_exp = x.slice(1);
-      if (lambda_exp.length < 2) throw "lambda takes two arguments";
-      var params = lambda_exp[0];
-      var exp = lambda_exp[1];
-      var local_context = new Context();
-      local_context.parent_context = env;
-      for (i = 0; i < arguments.length; i++)
-        local_context.add(params[i],arguments[i]);
-      return eval_l(exp, local_context);
-    }
-    return new_func; // return higher order function
-  }
   else if (x[0] == 'if')
   {
     // if then else
@@ -182,9 +163,18 @@ eval_l = function(x, env)
     // edge case: defining a function
     if (x[0] == 'define' && typeof(x[1]) == 'object' && x[1].length > 1)
       return eval_l(['define',x[1][0],['lambda',x[1].slice(1),x[2]]],env);
-    // lazy hack: set! and define have identical behavior here
-    env.add(x[1], eval_l(x[2],env));   
+    else if (x[0] == 'define' && x[2][0] == "lambda")
+    {
+      var new_func = build_function(x[2].slice(1));
+      env.add(x[1],new_func);
+    }
+    else {
+      // lazy hack: set! and define have identical behavior here
+      env.add(x[1], eval_l(x[2],env));   
+    }
   }
+  else if (x[0] == 'lambda')
+    return build_function(x.slice(1));
   else if (x[0] == 'begin')
   {
     // run a list of expressions in sequence and return the value returned by the last one
@@ -214,6 +204,25 @@ eval_l = function(x, env)
     } else // probably something wrong
       throw 'Not sure what to do with input \'' + x[0] + '\'';
   }
+}
+
+build_function = function(lambda_exp)
+{
+  // construct a new function by creating a local scope
+  // and defining the passed values in it, then passing
+  // that to eval
+  if (lambda_exp.length < 2) throw "lambda takes two arguments";
+  var params = lambda_exp[0];
+  var exp = lambda_exp[1];
+  var new_func = function()
+  {
+    var local_context = new Context();
+    local_context.parent_context = env;
+    for (i = 0; i < arguments.length; i++)
+      local_context.add(params[i],arguments[i]);
+    return eval_l(exp, local_context);
+  }
+  return new_func; // return higher order function
 }
 
 // logic for parsing a string of scheme code
