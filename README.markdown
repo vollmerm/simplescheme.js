@@ -34,6 +34,8 @@ eval_l(['+',1,['*',3,4]]);
 // 13
 ```
 
+Comments (anything from a ; to the end of a line) are removed by the parser.
+
 Implementation details
 ----------------------
 
@@ -52,7 +54,7 @@ While it's usable, a lot is missing from the interpreter in its current state.
 
 The built-in functions are fairly limited. The standards (cons, car, cdr, if, +, -, =, quote, etc) _are_ implemented, as well as lambda functions.
 
-Currently there is no error checking. Numbers are the only supported type. Single-quote shortcut for quotes and (define (f x)) syntax for functions are both not implemented. No tail recursion, no call. Also it's probably buggy. Sounds great, right?
+Currently there is no error checking. Numbers are the only supported type. Single-quote shortcut for quotes and (define (f x)) syntax for functions are both not implemented. No tail recursion, no call. Also it's buggy. No refunds.
 
 Extending
 ---------
