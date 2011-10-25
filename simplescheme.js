@@ -33,21 +33,26 @@ Context.prototype.find = function(key)
 }
 
 // some primitive functions for testing
-root_env = new Context();
-root_env.add('+', function(x,y) { return x+y });
-root_env.add('-', function(x,y) { return x-y });
-root_env.add('*', function(x,y) { return x*y });
-root_env.add('/', function(x,y) { return x/y });
-root_env.add('>', function(x,y) { return x>y });
-root_env.add('<', function(x,y) { return x<y });
-root_env.add('>=', function(x,y) { return x>=y });
-root_env.add('<=', function(x,y) { return x<=y });
-root_env.add('=', function(x,y) { return x==y });
-root_env.add('car', function(x) { return x[0] });
-root_env.add('cdr', function(x) { return x.slice(1) });
-root_env.add('cons', function(x,y) { y.splice(0,0,x); return y; });
-root_env.add('length', function(x) { x.length });
-root_env.add('null?', function(x) { !x });
+set_root = function()
+{
+  root_env = new Context();
+  root_env.add('+', function(x,y) { return x+y });
+  root_env.add('-', function(x,y) { return x-y });
+  root_env.add('*', function(x,y) { return x*y });
+  root_env.add('/', function(x,y) { return x/y });
+  root_env.add('>', function(x,y) { return x>y });
+  root_env.add('<', function(x,y) { return x<y });
+  root_env.add('>=', function(x,y) { return x>=y });
+  root_env.add('<=', function(x,y) { return x<=y });
+  root_env.add('=', function(x,y) { return x==y });
+  root_env.add('car', function(x) { return x[0] });
+  root_env.add('cdr', function(x) { return x.slice(1) });
+  root_env.add('cons', function(x,y) { y.splice(0,0,x); return y; });
+  root_env.add('length', function(x) { return x.length });
+  root_env.add('null?', function(x) { return (x.length < 1) });
+  root_env.add('#f', false);
+  root_env.add('#t', true);
+}
 
 is_value = function(s)
 {
@@ -67,7 +72,10 @@ eval_l = function(x, env)
   else if (val = env.find(x))
     return val; // a value in the context
   else if (x[0] == 'quote')
-    return x.slice(1); // quoted value or list
+  {
+    if (!x.slice(1)) return [];
+    else return x.slice(1); // quoted value or list
+  }
   else if (x[0] == 'lambda')
   {
     // construct a new function by creating a local scope
@@ -195,10 +203,16 @@ get_tokens = function(str)
   return tokens;
 }
 
+remove_comments = function(str)
+{
+  
+}
+
 parse = function(str)
 {
+  set_root();
   // pass each statement to eval and return output
-  var tokens = get_tokens(str.replace(/^\s+|\s+$/g, '').replace(/(\r\n|\n|\r)/gm,""));
+  var tokens = get_tokens(str.replace(/;.*$|;.*[\n\r$]/g,'').replace(/^\s+|\s+$/g, '').replace(/(\r\n|\n|\r)/gm,""));
   var output = [];
   for (var i = 0; i < tokens.length; i++)
   {
@@ -214,4 +228,3 @@ function is_number(n)
   // borrowed from the interwebs, crazy javascript hack
   return !isNaN(parseFloat(n)) && isFinite(n);
 }
-

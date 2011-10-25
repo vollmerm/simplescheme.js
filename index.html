@@ -36,19 +36,38 @@ $(function() {
 			<p>This page is an example use of simplescheme.js: it takes 
 			the scheme code written in the left-hand box, and (once the
 			<em>eval</em> button is pressed) interprets it and prints the
-			result in the right-hand panel.</p>
+      result in the right-hand panel.</p>
+      <p>This script is still very buggy. It currently has no error
+      checking ability, so code that fails to run will simply halt
+      and leave the output unchanged.</p>
 			<p>For more info (and the source code) for simplescheme.js,
 			<a href="https://github.com/probabilityZero/simplescheme.js"
 			title="simplescheme.js on github">look it up on Github</a>.
 			<div style="width: 435px; float: left;">
 				<h2>Input</h2>
 				<form id="input" action="javascript: return false;">
-					<textarea rows="20" cols="75" id="input_text">
+          <textarea rows="20" cols="75" id="input_text">
+; factorial
 (define fact (lambda (n)
   (if (<= n 1) 1
-      (* n (fact (- n 1))))))
+  (* n (fact (- n 1))))))
 
 (fact 10)
+
+
+; higher order functions
+(define adder (lambda (x)
+  (lambda (y) (+ x y)))) ; return lambda function
+
+((adder 5) 5)
+
+; compute length of a list
+(define len (lambda (L)
+  (if (null? L) 0
+      (+ 1 (len (cdr L))))))
+
+(len (quote 1 2 3))
+
 					</textarea>
 					<input class="g-button" type="submit" value="eval"
 					style="float:right; margin-right:15px;">
