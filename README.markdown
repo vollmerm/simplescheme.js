@@ -52,9 +52,11 @@ Progress
 
 While it's usable, a lot is missing from the interpreter in its current state. 
 
-The built-in functions are fairly limited. The standards (cons, car, cdr, if, +, -, =, quote, etc) _are_ implemented, as well as lambda functions.
+The built-in functions are fairly limited. The standards (cons, car, cdr, if, cond, +, -, =, quote, etc) _are_ implemented, as well as lambda functions.
 
-Currently there is only very basic error checking. Numbers are the only supported type. Single-quote shortcut for quotes and (define (f x)) syntax for functions are both not implemented. No tail recursion, no call. Also it's buggy. No refunds.
+Currently there is only very basic error checking. Numbers are the only supported type. Single-quote shortcut for quotes and (define (f x)) syntax for functions are both not implemented -- use (define f (lambda (x) (exp))).
+
+Also, it's a bit buggy. It hasn't been very thoroughly tested so far.
 
 Extending
 ---------
