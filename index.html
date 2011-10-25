@@ -82,6 +82,34 @@ $(function() {
       (+ 1 (len (cdr L))))))
 
 (len (quote 1 2 3))
+(len (quote 1 2 3 (4 5)))
+
+
+; misc. stuff
+
+(define degrees-to-radians (lambda (x)
+  (* x (/ PI 180))))
+
+(= (sin (degrees-to-radians 90))
+   (cos (degrees-to-radians 0)))
+
+(list 1 2 3) ; list accepts n arguments
+
+; quote can make symbols
+(quote the end of the world)
+
+; cond is transformed into a nested if
+(cond ((= 1 2) (quote nope))
+      ((= 1 1) (quote yes)))
+
+(define isinlist (lambda (L a)
+  (if (null? L) #f
+      (if (= a (car L)) #t
+          (isinlist (cdr L) a)))))
+
+(isinlist (quote 1 2 3) 2)
+(isinlist (quote 1 2 3) 4)
+
 
           </textarea>
           <input class="g-button" type="submit" value="eval"

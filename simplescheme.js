@@ -22,7 +22,7 @@ Context.prototype.add = function(key,val)
 Context.prototype.find = function(key)
 {
   found_val = this.vals[key];
-  if (!found_val)
+  if (!found_val && found_val != 0)
   {
     if (!this.parent_context)
       return null;
@@ -50,8 +50,51 @@ set_root = function()
   root_env.add('cons', function(x,y) { y.splice(0,0,x); return y; });
   root_env.add('length', function(x) { return x.length });
   root_env.add('null?', function(x) { return (x.length < 1) });
+  // a bunch of stuff from the standard library
+  root_env.add('PI',Math.PI);
+  root_env.add('abs',Math.abs);
+  root_env.add('acos',Math.acos);
+  root_env.add('asin',Math.asin);
+  root_env.add('atan',Math.atan);
+  root_env.add('ceil',Math.ceil);
+  root_env.add('cos',Math.cos);
+  root_env.add('exp',Math.exp);
+  root_env.add('floor',Math.floor);
+  root_env.add('log',Math.log);
+  root_env.add('max',Math.max);
+  root_env.add('min',Math.min);
+  root_env.add('pow',Math.pow);
+  root_env.add('random',Math.random); // this one definitely isn't purely functional
+  root_env.add('sin',Math.sin);
+  root_env.add('sqrt',Math.sqrt);
+  root_env.add('tan',Math.tan);
+  // true and false constants
   root_env.add('#f', false);
   root_env.add('#t', true);
+  // the arguments object isn't really an array, even though it pretends to be,
+  // so it has to be converted
+  root_env.add('list', function () { return Array.prototype.slice.call(arguments) });
+  // some boolean operations
+  root_env.add('and',
+      function ()
+      {
+        for (var i = 0; i < arguments.length; i++)
+        {
+          if (!arguments[i]) return false;
+        }
+        return true;
+      }
+  );
+  root_env.add('or',
+      function ()
+      {
+        for (var i = 0; i < arguments.length; i++)
+        {
+          if (arguments[i]) return true;
+        }
+        return false;
+      }
+  )
 }
 
 is_value = function(s)
@@ -69,8 +112,8 @@ eval_l = function(x, env)
     env = root_env;
   if (is_value(x))
     return x; // just a number
-  else if (val = env.find(x))
-    return val; // a value in the context
+  else if (env.find(x) || env.find(x) == 0) // otherwise the number 0 can't be stored
+    return env.find(x); // a value in the context
   else if (x[0] == 'quote')
   {
     if (!x.slice(1)) return [];
@@ -100,10 +143,27 @@ eval_l = function(x, env)
     var cond = x[1];
     var doexp = x[2];
     var elseexp = x[3];
-    if (eval_l(cond, env))
+    if (eval_l(cond, env) == '#t')
       return eval_l(doexp, env);
     else
       return eval_l(elseexp, env);
+  }
+  else if (x[0] == 'cond')
+  {
+    var cond_exp = x.slice(1);
+    if (cond_exp.length > 1)
+    {
+      generate_if = function(exp)
+      {
+        if (exp.length == 1) return ['if',exp[0][0],exp[0][1]];
+        else 
+        {
+          var current_exp = exp.shift();
+          return ['if',current_exp[0],current_exp[1],generate_if(exp)];
+        }
+      }
+      return eval_l(generate_if(cond_exp));
+    } else throw 'Cond must have more than one conditions';
   }
   else if (x[0] == 'set!' || x[0] == 'define')
   {
@@ -130,8 +190,13 @@ eval_l = function(x, env)
         evaluated_elements[i] = (eval_l(x[i],env));
     // call function with apply
     if (typeof(evaluated_elements[0]) == 'function')
-      return evaluated_elements[0].apply(null,evaluated_elements.slice(1));
-    else // probably something wrong
+    {
+      var returned_value = evaluated_elements[0].apply(null,evaluated_elements.slice(1));
+      if (typeof(returned_value) == 'boolean')
+        return (returned_value ? '#t' : '#f');
+      else
+        return returned_value;
+    } else // probably something wrong
       throw 'Not sure what to do with input \'' + x[0] + '\'';
   }
 }
