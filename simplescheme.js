@@ -125,12 +125,14 @@ eval_l = function(x, env)
   {
     // calling a procedure!
     var evaluated_elements = new Array(x.length);
-    for (var i = 0; i < x.length; i++) // eval each item in list
-      evaluated_elements[i] = (eval_l(x[i],env));
+    if (x.length > 1)
+      for (var i = 0; i < x.length; i++) // eval each item in list
+        evaluated_elements[i] = (eval_l(x[i],env));
     // call function with apply
-    // this would be a good place to try to catch errors if
-    // I weren't so lazy
-    return evaluated_elements[0].apply(null,evaluated_elements.slice(1));
+    if (typeof(evaluated_elements[0]) == 'function')
+      return evaluated_elements[0].apply(null,evaluated_elements.slice(1));
+    else // probably something wrong
+      throw 'Not sure what to do with input \'' + x[0] + '\'';
   }
 }
 
@@ -212,11 +214,16 @@ parse = function(str)
 {
   set_root();
   // pass each statement to eval and return output
-  var tokens = get_tokens(str.replace(/;.*$|;.*[\n\r$]/g,'').replace(/^\s+|\s+$/g, '').replace(/(\r\n|\n|\r)/gm,""));
+  var tokens;
+  try {
+    tokens = get_tokens(str.replace(/;.*$|;.*[\n\r$]/g,'').replace(/^\s+|\s+$/g, '').replace(/(\r\n|\n|\r)/gm,""));
+  } catch(e) { return e; }
   var output = [];
   for (var i = 0; i < tokens.length; i++)
   {
-    var returned_value = eval_l(tokens[i]);
+    var returned_value;
+    try { returned_value = eval_l(tokens[i]); }
+    catch(e) { returned_value = e; }
     // ignore statements that return nothing
     if (returned_value) output.push(returned_value);
   }
