@@ -69,6 +69,17 @@ $(function() {
 
 (fact 10)
 
+; tail factorial
+(define helper-fact (lambda (x y)
+    (if (= x 0) y
+        (helper-fact (- x 1) (* x y)))))
+(define tail-fact (lambda (n)
+  (helper-fact n 1)))
+  
+(= (tail-fact 10) (fact 10))
+
+(tail-fact 100)
+
 
 ; higher order functions
 (define adder (lambda (x)
@@ -110,6 +121,9 @@ $(function() {
 (isinlist (quote 1 2 3) 2)
 (isinlist (quote 1 2 3) 4)
 
+; boolean operations
+(and #t #f) ; false
+(and #t (or #t #f)) ; true
 
           </textarea>
           <input class="g-button" type="submit" value="eval"
