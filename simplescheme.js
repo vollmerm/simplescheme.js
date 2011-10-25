@@ -270,11 +270,6 @@ get_tokens = function(str)
   return tokens;
 }
 
-remove_comments = function(str)
-{
-  
-}
-
 parse = function(str)
 {
   set_root();
