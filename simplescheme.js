@@ -322,6 +322,7 @@ parse = function(str)
   // pass each statement to eval and return output
   var tokens;
   try {
+    // preprocessing for input string
     tokens = get_tokens(find_single_quotes(str).replace(/;.*$|;.*[\n\r$]/g,'')
                                                .replace(/^\s+|\s+$/g, '')
                                                .replace(/(\r\n|\n|\r)/gm,""));
