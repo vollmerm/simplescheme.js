@@ -165,7 +165,7 @@ eval_l = function(x, env)
       return eval_l(['define',x[1][0],['lambda',x[1].slice(1),x[2]]],env);
     else if (x[0] == 'define' && x[2][0] == "lambda")
     {
-      var new_func = build_function(x[2].slice(1));
+      var new_func = build_function(x[2].slice(1),env);
       env.add(x[1],new_func);
     }
     else {
@@ -174,7 +174,7 @@ eval_l = function(x, env)
     }
   }
   else if (x[0] == 'lambda')
-    return build_function(x.slice(1));
+    return build_function(x.slice(1),env);
   else if (x[0] == 'begin')
   {
     // run a list of expressions in sequence and return the value returned by the last one
@@ -206,7 +206,7 @@ eval_l = function(x, env)
   }
 }
 
-build_function = function(lambda_exp)
+build_function = function(lambda_exp,env)
 {
   // construct a new function by creating a local scope
   // and defining the passed values in it, then passing
