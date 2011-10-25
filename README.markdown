@@ -45,7 +45,7 @@ Javascript supports higher order functions, which greatly simplified the impleme
 
 Eval has a few base cases (if statement, define, lambda, value, etc). If none of these are the case, then it assumes that the expression is in the form of (function *parameters) and attempts to call it. If you get a weird Javascript error about apply not being a valid function, it's probably because you passed a list to eval that it didn't understand, so it tried to call the first element as a function.
 
-To build the context objects I used an [existing hash table script](http://rick.measham.id.au/javascript/hash.htm). It's very simple and elegent, and it's open source, so I decided to use it rather than implement my own.
+To build the context objects I used an [existing hash table script](http://rick.measham.id.au/javascript/hash.htm). It's very simple and elegent, and it's open source, so I decided to use it rather than implement my own. I also used [CodeMirror](http://codemirror.net/) for the syntax coloring in the editor.
 
 Progress
 --------
