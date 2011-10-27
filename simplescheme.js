@@ -370,7 +370,6 @@ find_single_quotes = function(str)
 
 parse = function(str)
 {
-  display_outputs = [];
   set_root(); // clear environment on each parse
   // pass each statement to eval and return output
   var tokens;
@@ -383,19 +382,23 @@ parse = function(str)
   var output = [];
   for (var i = 0; i < tokens.length; i++)
   {
+    display_outputs = [];
     var returned_value;
     // rudimentary error checking -- this try/catch block is mainly for catching
     // the javascript errors rather than sending them to FireBug
     returned_value = eval_l(tokens[i]);
+    var display_outputs_copy = display_outputs.slice(0);
     var output_string = "";
-    if (display_outputs.length > 0)
-      for (var i = 0; i < display_outputs.length; i++)
-        output_string = output_string.concat(display_outputs[i], output_string);
+    if (display_outputs_copy.length > 0)
+      for (var j = 0; j < display_outputs_copy.length; j++)
+        output_string = output_string.concat(display_outputs_copy[j], output_string);
     // ignore statements that return nothing
     if (returned_value)
       output.push(output_string.concat(
                  (typeof(returned_value) == "object" && returned_value.length > 1 ?
                  returned_value.join(",") : returned_value)));
+    else if (output_string)
+      output.push(output_string);
   }
   return output; // array of output values
 }
