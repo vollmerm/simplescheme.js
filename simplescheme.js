@@ -386,7 +386,9 @@ parse = function(str)
     var returned_value;
     // rudimentary error checking -- this try/catch block is mainly for catching
     // the javascript errors rather than sending them to FireBug
-    returned_value = eval_l(tokens[i]);
+    try {
+      returned_value = eval_l(tokens[i]);
+
     var display_outputs_copy = display_outputs.slice(0);
     var output_string = "";
     if (display_outputs_copy.length > 0)
@@ -399,6 +401,7 @@ parse = function(str)
                  returned_value.join(",") : returned_value)));
     else if (output_string)
       output.push(output_string);
+    } catch(e) { return [e]; }
   }
   return output; // array of output values
 }
