@@ -391,7 +391,7 @@ parse = function(str)
     var output_string = "";
     if (display_outputs_copy.length > 0)
       for (var j = 0; j < display_outputs_copy.length; j++)
-        output_string = output_string.concat(display_outputs_copy[j], output_string);
+        output_string += display_outputs_copy[j];
     // ignore statements that return nothing
     if (returned_value)
       output.push(output_string.concat(
