@@ -15,6 +15,8 @@
     
     <script type="text/javascript">
 $(function() {
+  var change_code = function(s) { editor.setValue(s); }
+  $.get("samples/default.scm", change_code);
   $('#input').submit(function(e) {
     var input_text = $('#input_text').val()
     var output_array = parse(input_text);
@@ -29,9 +31,7 @@ $(function() {
   $("#Samples").change(function() {
 	var selected = $("#Samples").val();
     var file = "samples/" + ($("#Samples option:selected").text() + ".scm").toLowerCase();
-    $.get(file, function(data) {
-      $("#input_text").val(data);
-    });
+    $.get(file, change_code);
   });
 });
     </script>
@@ -72,15 +72,6 @@ $(function() {
         <h2>Input</h2>
         <form id="input" action="javascript: return false;">
           <textarea rows="20" cols="55" id="input_text" style="font-family: 'Droid Sans Mono', 'Courier New', Courier, monospace;">
-; select from the drop-down menu below to load a sample file
-
-(define (fib n)
-  (if (< n 2)
-      n
-      (+ (fib (- n 1)) (fib (- n 2)))))
-
-(fib 8)
-
           </textarea>
           <div style="float:left; width:200px;">
 			<select id="Samples">

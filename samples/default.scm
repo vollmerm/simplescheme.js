@@ -1,3 +1,5 @@
+; select from the drop-down menu below to load a sample file
+
 ; factorial
 (define (fact n)
   (if (<= n 1) 1
