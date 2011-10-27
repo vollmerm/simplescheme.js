@@ -196,7 +196,12 @@ eval_l = function(x, env)
     if (x[1].length > 1 && x[1].slice(0,2) == "$~")
       display_outputs.push(x[1].slice(2));
     else 
-      display_outputs.push(eval_l(x[1],env));
+    {
+      var to_display = eval_l(x[1],env);
+      if (to_display.length > 1 && to_display.slice(0,2) == "$~")
+        display_outputs.push(to_display.slice(2));
+      else display_outputs.push(to_display);
+    }
     return null; // 100% side effect function, returns nothing
   }
   else if (x[0] == 'newline')
@@ -213,7 +218,7 @@ eval_l = function(x, env)
       for (var i = 0; i < x.length; i++) // eval each item in list
       {
         evaluated_elements[i] = (eval_l(x[i],env));
-        if (typeof(evaluated_elements[i]) == "string" && 
+        if (typeof(evaluated_elements[i]) == "object" && evaluated_elements[i].length > 1 && 
             evaluated_elements[i].slice(0,2) == "$~")
           evaluated_elements[i] = evaluated_elements[i].slice(2);
       }
