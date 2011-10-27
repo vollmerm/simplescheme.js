@@ -50,7 +50,8 @@ set_root = function()
   root_env.add('cdr', function(x) { return x.slice(1) });
   root_env.add('cons', function(x,y) { y.splice(0,0,x); return y; });
   root_env.add('length', function(x) { return x.length });
-  root_env.add('null?', function(x) { return (x.length < 1) });
+  root_env.add('null?', function(x) { return (!x || x.length < 1) });
+  root_env.add('empty?', function(x) { return (!x || x.length < 1) });
   // a bunch of stuff from the standard library
   root_env.add('PI',Math.PI);
   root_env.add('abs',Math.abs);
@@ -70,8 +71,8 @@ set_root = function()
   root_env.add('sqrt',Math.sqrt);
   root_env.add('tan',Math.tan);
   // true and false constants
-  root_env.add('#f', false);
-  root_env.add('#t', true);
+  root_env.add('#f', "#f");
+  root_env.add('#t', "#t");
   // the arguments object isn't really an array, even though it pretends to be,
   // so it has to be converted
   root_env.add('list', function () { return Array.prototype.slice.call(arguments) });
@@ -80,7 +81,7 @@ set_root = function()
       function ()
       {
         for (var i = 0; i < arguments.length; i++)
-          if (!arguments[i]) return false;
+          if (!arguments[i] || arguments[i] == "#f") return false;
         return true;
       }
   );
@@ -88,7 +89,7 @@ set_root = function()
       function ()
       {
         for (var i = 0; i < arguments.length; i++)
-          if (arguments[i]) return true;
+          if (arguments[i]|| arguments[i] == "#t") return true;
         return false;
       }
   );
@@ -100,6 +101,8 @@ is_value = function(s)
   // the typeof function in JS is confusing sometimes. at least it works
   // predictably for numbers (kind-of)
 }
+
+var display_outputs = []; // display and newline calls get put here
 
 // eval function
 // called with an expression and an optional environment (a Context object)
@@ -114,8 +117,8 @@ eval_l = function(x, env)
   // true, it falls back on the base case: the first element in the list is a function
   // and the rest of the elements are arguments. if this also fails, eval_l throws an
   // error.
-  if (is_value(x))
-    return x; // just a number
+  if (is_value(x) || (x.length > 1 && x.slice(0,2) == "$~"))
+    return x; // just a number or string
   else if (env.find(x) || env.find(x) == 0) // otherwise the number 0 can't be stored
     return env.find(x); // a value in the context
   else if (x[0] == 'quote')
@@ -142,12 +145,11 @@ eval_l = function(x, env)
     {
       generate_if = function(exp)
       {
-        // tricky: this assumes that the last condition in cond will
-        // always be true, if we get to it.
         if (exp.length == 1)
         {
-          if (eval_l(exp[0][0]) == '#f') throw "Last condition on cond reached, no match.";
-          return exp[0][1];
+          var current_exp = exp[0];
+          return ['if',current_exp[0],current_exp[1],
+                  "(display \"None of the cond statemens were true\")"];
         } else 
         {
           // recursively build the if statement
@@ -162,8 +164,10 @@ eval_l = function(x, env)
   {
     if (x.slice(1).length == 0) throw "Define and set! require one or more expressions";
     // edge case: defining a function
-    if (x[0] == 'define' && typeof(x[1]) == 'object' && x[1].length > 1)
+    if (x[0] == 'define' && typeof(x[1]) == 'object' && x[1].length > 1 && x.length < 4)
       return eval_l(['define',x[1][0],['lambda',x[1].slice(1),x[2]]],env);
+    else if (x[0] == 'define' && typeof(x[1]) == 'object' && x[1].length > 1 && x.length >= 4)
+      return eval_l(['define',x[1][0],['lambda',x[1].slice(1),x.slice(2)]],env);
     else if (x[0] == 'define' && x[2][0] == "lambda")
     {
       var new_func = build_function(x[2].slice(1),env);
@@ -186,13 +190,33 @@ eval_l = function(x, env)
       returned = eval_l(expressions[i],env);
     return returned;
   }
+  else if (x[0] == 'display')
+  {
+    if (x.slice(1).length > 1) throw "display takes one argument";
+    if (x[1].length > 1 && x[1].slice(0,2) == "$~")
+      display_outputs.push(x[1].slice(2));
+    else 
+      display_outputs.push(eval_l(x[1],env));
+    return null; // 100% side effect function, returns nothing
+  }
+  else if (x[0] == 'newline')
+  {
+    if (x.slice(1) > 1) throw "newline takes no arguments";
+    else display_outputs.push("\n");
+    return null;
+  }
   else
   {
     // calling a procedure!
     var evaluated_elements = new Array(x.length);
     if (x.length > 1)
       for (var i = 0; i < x.length; i++) // eval each item in list
+      {
         evaluated_elements[i] = (eval_l(x[i],env));
+        if (typeof(evaluated_elements[i]) == "string" && 
+            evaluated_elements[i].slice(0,2) == "$~")
+          evaluated_elements[i] = evaluated_elements[i].slice(2);
+      }
     // call function with apply
     if (typeof(evaluated_elements[0]) == 'function')
     {
@@ -203,7 +227,7 @@ eval_l = function(x, env)
       else
         return returned_value; // anything other than boolean can be returned directly
     } else // probably something wrong
-      throw 'Not sure what to do with input \'' + x[0] + '\'';
+      throw 'Not sure what to do with input \'' + x[0] + '\'\n from ' + x;
   }
 }
 
@@ -221,6 +245,15 @@ build_function = function(lambda_exp,env)
     local_context.parent_context = env;
     for (i = 0; i < arguments.length; i++)
       local_context.add(params[i],arguments[i]);
+    if (typeof(exp) == "object" && typeof(exp[0]) == "object" && exp[0].length > 1)
+    {
+      var ret;
+      for (var i = 0; i < exp.length; i++)
+      {
+        ret = eval_l(exp[i],local_context);
+      }
+      return ret;
+    } else
     return eval_l(exp, local_context);
   }
   return new_func; // return higher order function
@@ -255,30 +288,31 @@ get_tokens = function(str)
   // the first that popped into my head: I create a buffer and add characters
   // to it until I hit whitespace or the end of the string.
   var token_buf = '';
+  // don't build token if we're inside a quote
+  var in_quote = false;
   while (index < str.length)
   {
-    if (str[index] == '(')
+    if (!in_quote && str[index] == '(')
     {
       // match the parens and recurse
       var end_match = find_matching_parenthesis(str.substring(index)) + index;
       tokens.push(get_tokens(str.substring(index+1,end_match)));
       index = end_match;
     }
-    else if (str[index] == ' ')
+    else if (str[index] == ' ' && !in_quote)
     {
       // time to add the buffers to the token array
       if (token_buf)
       {
-        var new_token = token_buf;
-        if (is_number(new_token))
-          new_token = Number(new_token);
-        tokens.push(new_token);
+        tokens.push(build_token(token_buf));
       }
       // reset the buffer
       token_buf = '';
     }
     else
     {
+      if (!in_quote && str[index] == "\"") in_quote = true;
+      else if (in_quote && str[index] == "\"") in_quote = false;
       token_buf = token_buf.concat(str[index]);
     }
     index++;
@@ -286,13 +320,30 @@ get_tokens = function(str)
   // add any remaining characters from the buffer
   if (token_buf)
   {
-    var new_token = token_buf;
-    if (is_number(new_token))
-      new_token = Number(new_token);
-    tokens.push(new_token);
+    tokens.push(build_token(token_buf));
   }
   // return the token array
   return tokens;
+}
+
+build_token = function(s)
+{
+  var new_token = s;
+  if (is_number(new_token))
+    new_token = Number(new_token);
+  else if (new_token[0]=="\"" && new_token[new_token.length-1]=="\"")
+  {
+    // since tokens are stored as strings, I can't store scheme strings
+    // the same way. to differentiate them I'm going to put some unusual
+    // nonsense characters at the end.
+    new_token = "$~" + new_token.slice(1,new_token.length-1);
+    var internal_quote = new_token.indexOf("\"")
+    if (internal_quote != -1 && new_token[internal_quote-1] != "\\")
+    {
+      throw "Premature end of string or unescaped quotes";
+    }
+  }
+  return new_token;
 }
 
 find_single_quotes = function(str)
@@ -319,6 +370,7 @@ find_single_quotes = function(str)
 
 parse = function(str)
 {
+  display_outputs = [];
   set_root(); // clear environment on each parse
   // pass each statement to eval and return output
   var tokens;
@@ -334,10 +386,16 @@ parse = function(str)
     var returned_value;
     // rudimentary error checking -- this try/catch block is mainly for catching
     // the javascript errors rather than sending them to FireBug
-    try { returned_value = eval_l(tokens[i]); }
-    catch(e) { returned_value = e; }
+    returned_value = eval_l(tokens[i]);
+    var output_string = "";
+    if (display_outputs.length > 0)
+      for (var i = 0; i < display_outputs.length; i++)
+        output_string = output_string.concat(display_outputs[i], output_string);
     // ignore statements that return nothing
-    if (returned_value) output.push(returned_value);
+    if (returned_value)
+      output.push(output_string.concat(
+                 (typeof(returned_value) == "object" && returned_value.length > 1 ?
+                 returned_value.join(",") : returned_value)));
   }
   return output; // array of output values
 }
