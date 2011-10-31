@@ -93,6 +93,33 @@ set_root = function()
         return false;
       }
   );
+  root_env.add('string>?',
+      function (x,y)
+      {
+        if (typeof(x) != "string" || typeof(y) != "string")
+          throw "expected string";
+        else
+          return x>y;
+      }
+  );
+  root_env.add('string<?',
+      function (x,y)
+      {
+        if (typeof(x) != "string" || typeof(y) != "string")
+          throw "expected string";
+        else
+          return x<y;
+      }
+  );
+  root_env.add('string=?',
+      function (x,y)
+      {
+        if (typeof(x) != "string" || typeof(y) != "string")
+          throw "expected string";
+        else
+          return x==y;
+      }
+  );
 };
 
 is_value = function(s)
