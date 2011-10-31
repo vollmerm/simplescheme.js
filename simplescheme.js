@@ -17,12 +17,12 @@ function Context()
 Context.prototype.add = function(key,val)
 {
   this.vals[key] = val;
-}
+};
 
 Context.prototype.find = function(key)
 {
   found_val = this.vals[key];
-  if (!found_val && found_val != 0)
+  if (!found_val && found_val !== 0)
   {
     if (!this.parent_context)
       return null;
@@ -30,28 +30,28 @@ Context.prototype.find = function(key)
       return this.parent_context.find(key);
   } else
     return found_val;
-}
+};
 
 // some primitive functions for testing
 set_root = function()
 {
   root_env = new Context();
-  root_env.add('+', function(x,y) { return x+y });
-  root_env.add('-', function(x,y) { return x-y });
-  root_env.add('*', function(x,y) { return x*y });
-  root_env.add('/', function(x,y) { return x/y });
-  root_env.add('>', function(x,y) { return x>y });
-  root_env.add('<', function(x,y) { return x<y });
-  root_env.add('>=', function(x,y) { return x>=y });
-  root_env.add('<=', function(x,y) { return x<=y });
-  root_env.add('=', function(x,y) { return x==y });
+  root_env.add('+', function(x,y) { return x+y; });
+  root_env.add('-', function(x,y) { return x-y; });
+  root_env.add('*', function(x,y) { return x*y; });
+  root_env.add('/', function(x,y) { return x/y; });
+  root_env.add('>', function(x,y) { return x>y; });
+  root_env.add('<', function(x,y) { return x<y; });
+  root_env.add('>=', function(x,y) { return x>=y; });
+  root_env.add('<=', function(x,y) { return x<=y; });
+  root_env.add('=', function(x,y) { return x==y; });
   root_env.add('%', function(x,y) { return x%y; });
-  root_env.add('car', function(x) { return x[0] });
-  root_env.add('cdr', function(x) { return x.slice(1) });
+  root_env.add('car', function(x) { return x[0]; });
+  root_env.add('cdr', function(x) { return x.slice(1); });
   root_env.add('cons', function(x,y) { y.splice(0,0,x); return y; });
-  root_env.add('length', function(x) { return x.length });
-  root_env.add('null?', function(x) { return (!x || x.length < 1) });
-  root_env.add('empty?', function(x) { return (!x || x.length < 1) });
+  root_env.add('length', function(x) { return x.length; });
+  root_env.add('null?', function(x) { return (!x || x.length < 1); });
+  root_env.add('empty?', function(x) { return (!x || x.length < 1); });
   // a bunch of stuff from the standard library
   root_env.add('PI',Math.PI);
   root_env.add('abs',Math.abs);
@@ -75,7 +75,7 @@ set_root = function()
   root_env.add('#t', "#t");
   // the arguments object isn't really an array, even though it pretends to be,
   // so it has to be converted
-  root_env.add('list', function () { return Array.prototype.slice.call(arguments) });
+  root_env.add('list', function () { return Array.prototype.slice.call(arguments); });
   // some boolean operations
   root_env.add('and',
       function ()
@@ -93,14 +93,14 @@ set_root = function()
         return false;
       }
   );
-}
+};
 
 is_value = function(s)
 {
   return (typeof(s) == 'number');
   // the typeof function in JS is confusing sometimes. at least it works
   // predictably for numbers (kind-of)
-}
+};
 
 var display_outputs = []; // display and newline calls get put here
 
@@ -119,7 +119,7 @@ eval_l = function(x, env)
   // error.
   if (is_value(x) || (x.length > 1 && x.slice(0,2) == "$~"))
     return x; // just a number or string
-  else if (env.find(x) || env.find(x) == 0) // otherwise the number 0 can't be stored
+  else if (env.find(x) || env.find(x) === 0) // otherwise the number 0 can't be stored
     return env.find(x); // a value in the context
   else if (x[0] == 'quote')
   {
@@ -156,13 +156,13 @@ eval_l = function(x, env)
           var current_exp = exp.shift();
           return ['if',current_exp[0],current_exp[1],generate_if(exp)];
         }
-      }
+      };
       return eval_l(generate_if(cond_exp),env);
     } else throw 'Cond must have more than one conditions';
   }
   else if (x[0] == 'set!' || x[0] == 'define')
   {
-    if (x.slice(1).length == 0) throw "Define and set! require one or more expressions";
+    if (x.slice(1).length === 0) throw "Define and set! require one or more expressions";
     // edge case: defining a function
     if (x[0] == 'define' && typeof(x[1]) == 'object' && x[1].length > 1 && x.length < 4)
       return eval_l(['define',x[1][0],['lambda',x[1].slice(1),x[2]]],env);
@@ -184,7 +184,7 @@ eval_l = function(x, env)
   {
     // run a list of expressions in sequence and return the value returned by the last one
     var expressions = x.slice(1);
-    if (expressions.length == 0) throw "Begin takes one or more expressions";
+    if (expressions.length === 0) throw "Begin takes one or more expressions";
     var returned;
     for (var i = 0; i < expressions.length; i++)
       returned = eval_l(expressions[i],env);
@@ -215,13 +215,8 @@ eval_l = function(x, env)
     // calling a procedure!
     var evaluated_elements = new Array(x.length);
     if (x.length > 1)
-      for (var i = 0; i < x.length; i++) // eval each item in list
-      {
-        evaluated_elements[i] = (eval_l(x[i],env));
-        if (typeof(evaluated_elements[i]) == "object" && evaluated_elements[i].length > 1 && 
-            evaluated_elements[i].slice(0,2) == "$~")
-          evaluated_elements[i] = evaluated_elements[i].slice(2);
-      }
+      for (var j = 0; j < x.length; j++) // eval each item in list
+        evaluated_elements[j] = (eval_l(x[j],env));
     // call function with apply
     if (typeof(evaluated_elements[0]) == 'function')
     {
@@ -234,7 +229,7 @@ eval_l = function(x, env)
     } else // probably something wrong
       throw 'Not sure what to do with input \'' + x[0] + '\'\n from ' + x;
   }
-}
+};
 
 build_function = function(lambda_exp,env)
 {
@@ -260,9 +255,9 @@ build_function = function(lambda_exp,env)
       return ret;
     } else
     return eval_l(exp, local_context);
-  }
+  };
   return new_func; // return higher order function
-}
+};
 
 // logic for parsing a string of scheme code
 
@@ -270,7 +265,7 @@ find_matching_parenthesis = function(str)
 {
   var p_count = 1;
   var index = 0; // assume first char is (
-  while (p_count != 0 && index < str.length)
+  while (p_count !== 0 && index < str.length)
   {
     index++;
     if (str[index] == ')') p_count--;
@@ -278,7 +273,14 @@ find_matching_parenthesis = function(str)
   }
   // assume matching paren exists
   return index;
-}
+};
+
+
+is_number = function(n)
+{
+  // borrowed from the interwebs, crazy javascript hack
+  return !isNaN(parseFloat(n)) && isFinite(n);
+};
 
 get_tokens = function(str)
 {
@@ -329,7 +331,7 @@ get_tokens = function(str)
   }
   // return the token array
   return tokens;
-}
+};
 
 build_token = function(s)
 {
@@ -342,14 +344,14 @@ build_token = function(s)
     // the same way. to differentiate them I'm going to put some unusual
     // nonsense characters at the end.
     new_token = "$~" + new_token.slice(1,new_token.length-1);
-    var internal_quote = new_token.indexOf("\"")
+    var internal_quote = new_token.indexOf("\"");
     if (internal_quote != -1 && new_token[internal_quote-1] != "\\")
     {
       throw "Premature end of string or unescaped quotes";
     }
   }
   return new_token;
-}
+};
 
 find_single_quotes = function(str)
 {
@@ -371,7 +373,7 @@ find_single_quotes = function(str)
     index++;
   }
   return str;
-}
+};
 
 parse = function(str)
 {
@@ -382,7 +384,7 @@ parse = function(str)
     // preprocessing for input string
     tokens = get_tokens(find_single_quotes(str).replace(/;.*$|;.*[\n\r$]/g,'')
                                                .replace(/^\s+|\s+$/g, '')
-                                               .replace(/(\r\n|\n|\r)/gm,""));
+                                               .replace(/(\r\n|\n|\r)/gm,''));
   } catch(e) { return e; }
   var output = [];
   for (var i = 0; i < tokens.length; i++)
@@ -399,6 +401,8 @@ parse = function(str)
     if (display_outputs_copy.length > 0)
       for (var j = 0; j < display_outputs_copy.length; j++)
         output_string += display_outputs_copy[j];
+    if (typeof(returned_value) == "string" && returned_value.slice(0,2) == "$~")
+        returned_value = returned_value.slice(2);
     // ignore statements that return nothing
     if (returned_value)
       output.push(output_string.concat(
@@ -409,10 +413,5 @@ parse = function(str)
     } catch(e) { return [e]; }
   }
   return output; // array of output values
-}
+};
 
-function is_number(n)
-{
-  // borrowed from the interwebs, crazy javascript hack
-  return !isNaN(parseFloat(n)) && isFinite(n);
-}
