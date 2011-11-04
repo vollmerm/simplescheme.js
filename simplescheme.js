@@ -163,7 +163,11 @@ eval_l = function(x, env)
     if (eval_l(cond, env) == '#t')
       return eval_l(doexp, env);
     else
+    {
+      // every if statement must have an else statement
+      if (!elseexp) throw "No else condition or incomplete cond";
       return eval_l(elseexp, env);
+    }
   }
   else if (x[0] == 'cond')
   {
@@ -176,8 +180,8 @@ eval_l = function(x, env)
         if (exp.length == 1)
         {
           current_exp = exp[0];
-          return ['if',current_exp[0],current_exp[1],
-                  "(display \"None of the cond statemens were true\")"];
+          // return null if all conditions are false
+          return ['if',current_exp[0],current_exp[1],null];
         } else 
         {
           // recursively build the if statement
