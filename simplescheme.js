@@ -172,15 +172,16 @@ eval_l = function(x, env)
     {
       generate_if = function(exp)
       {
+        var current_exp;
         if (exp.length == 1)
         {
-          var current_exp = exp[0];
+          current_exp = exp[0];
           return ['if',current_exp[0],current_exp[1],
                   "(display \"None of the cond statemens were true\")"];
         } else 
         {
           // recursively build the if statement
-          var current_exp = exp.shift();
+          current_exp = exp.shift();
           return ['if',current_exp[0],current_exp[1],generate_if(exp)];
         }
       };
