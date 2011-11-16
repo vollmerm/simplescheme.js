@@ -33,7 +33,7 @@ Context.prototype.find = function(key)
 };
 
 // some primitive functions for testing
-set_root = function()
+function set_root()
 {
   root_env = new Context();
   root_env.add('+', function(x,y) { return x+y; });
@@ -120,20 +120,20 @@ set_root = function()
           return x==y;
       }
   );
-};
+}
 
-is_value = function(s)
+function is_value(s)
 {
   return (typeof(s) == 'number');
   // the typeof function in JS is confusing sometimes. at least it works
   // predictably for numbers (kind-of)
-};
+}
 
 var display_outputs = []; // display and newline calls get put here
 
 // eval function
 // called with an expression and an optional environment (a Context object)
-eval_l = function(x, env)
+function eval_l(x, env)
 {
   if (!env) // if not set default to root_env
     env = root_env;
@@ -261,9 +261,9 @@ eval_l = function(x, env)
     } else // probably something wrong
       throw 'Not sure what to do with input \'' + x[0] + '\'\n from ' + x;
   }
-};
+}
 
-build_function = function(lambda_exp,env)
+function build_function(lambda_exp,env)
 {
   // construct a new function by creating a local scope
   // and defining the passed values in it, then passing
@@ -279,21 +279,21 @@ build_function = function(lambda_exp,env)
       local_context.add(params[i],arguments[i]);
     if (typeof(exp) == "object" && typeof(exp[0]) == "object" && exp[0].length > 1)
     {
+			// a series of expressions
       var ret;
       for (var i = 0; i < exp.length; i++)
       {
         ret = eval_l(exp[i],local_context);
       }
       return ret;
-    } else
-    return eval_l(exp, local_context);
+    } else return eval_l(exp, local_context); // single expression
   };
   return new_func; // return higher order function
-};
+}
 
 // logic for parsing a string of scheme code
 
-find_matching_parenthesis = function(str)
+function find_matching_parenthesis(str)
 {
   var p_count = 1;
   var index = 0; // assume first char is (
@@ -305,16 +305,16 @@ find_matching_parenthesis = function(str)
   }
   // assume matching paren exists
   return index;
-};
+}
 
 
-is_number = function(n)
+function is_number(n)
 {
   // borrowed from the interwebs, crazy javascript hack
   return !isNaN(parseFloat(n)) && isFinite(n);
-};
+}
 
-get_tokens = function(str)
+function get_tokens(str)
 {
   // recursively generate arrays of tokens by looking
   // for nested parenthesis
@@ -363,9 +363,9 @@ get_tokens = function(str)
   }
   // return the token array
   return tokens;
-};
+}
 
-build_token = function(s)
+function build_token(s)
 {
   var new_token = s;
   if (is_number(new_token))
@@ -383,9 +383,9 @@ build_token = function(s)
     }
   }
   return new_token;
-};
+}
 
-find_single_quotes = function(str)
+function find_single_quotes(str)
 {
   var index = 0;
   while (index < str.length)
@@ -405,9 +405,9 @@ find_single_quotes = function(str)
     index++;
   }
   return str;
-};
+}
 
-parse = function(str)
+function parse(str)
 {
   set_root(); // clear environment on each parse
   // pass each statement to eval and return output
@@ -445,5 +445,5 @@ parse = function(str)
     } catch(e) { return [e]; }
   }
   return output; // array of output values
-};
+}
 
