@@ -302,7 +302,7 @@ exports.SScheme = (function(){
       // run a list of expressions in sequence and return the value returned by the last one
       var expressions = x.slice(1);
       if (expressions.length === 0) throw "Begin takes one or more expressions";
-      return run_sequence(expressions,env,caller);
+      return run_sequence(expressions,env,caller,false);
     }
     else if (x[0] == 'display')
     {
@@ -391,16 +391,26 @@ exports.SScheme = (function(){
     {
       local_context = new Context();
       local_context.parent_context = env;
+      // The function needs to somehow inform run_sequence
+      // whether it has been called by a tail-call already or not. If
+      // it hasn't, run_sequence will attempt to check for tail recursion.
+      var tail = false;
       for (i = 0; i < arguments.length; i++)
       {
-        local_context.add(params[i],arguments[i]);
+        if (i == arguments.length-1 && !params[i] && arguments[i] == "tail")
+        {
+          tail = true;
+        } else {
+          // add passed parameters to the local environment
+          local_context.add(params[i],arguments[i]);
+        }
       }
-      return run_sequence(exp,local_context,name);
+      return run_sequence(exp,local_context,name,tail);
     };
     return new_func; // return higher order function
   }
 
-  function run_sequence(exp_list,env,caller)
+  function run_sequence(exp_list,env,caller,tail)
   {
     if (exp_list && (typeof(exp_list) == "object") && (typeof(exp_list[0]) == "object"))
     {
@@ -415,17 +425,23 @@ exports.SScheme = (function(){
       {
         current_exp = exp_stack.pop();
         ret = eval_l(current_exp,env,caller);
-        while (is_tail_call_indicator(ret))
+        // if we're already in the middle of a tail call loop, we want to 
+        // send the returned Tail_call object down the stack. We don't want
+        // to start another loop here.
+        while (!tail && is_tail_call_indicator(ret))
         {
           // keep calling this (tail-recursive) function until we hit
           // the termination case
-          ret = ret.func.apply(null,ret.ops);
+          var ops = ret.ops;
+          // tell the function that it was called from a tail call
+          ops.push("tail");
+          ret = ret.func.apply(null,ops);
         }
       }
       return ret;
     } else if (exp_list && (typeof(exp_list) == "object") && (typeof(exp_list[0]) != "object"))
     {
-      return run_sequence([exp_list],env,caller); // not really a sequence
+      return run_sequence([exp_list],env,caller,tail); // not really a sequence
     }
   }
 
