@@ -3,38 +3,16 @@
   <head>
     <link rel="stylesheet" type="text/css" href="styles/typography.css">
     <link rel="stylesheet" type="text/css" href="styles/button.css">
-	<link rel="stylesheet" type="text/css" href="CodeMirror/lib/codemirror.css">
-	<script src="CodeMirror/lib/codemirror.js" type="text/javascript"></script>
-	<script src="CodeMirror/mode/scheme/scheme.js" type="text/javascript"></script>
-	<link rel="stylesheet" type="text/css" href="CodeMirror/theme/eclipse.css">
-    <script src="hash.js" type="text/javascript"></script>
-    <script src="simplescheme.js" type="text/javascript"></script>
+	  <link rel="stylesheet" type="text/css" href="CodeMirror/lib/codemirror.css">
+	  <script src="CodeMirror/lib/codemirror.js" type="text/javascript"></script>
+	  <script src="CodeMirror/mode/scheme/scheme.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css" href="CodeMirror/theme/eclipse.css">
+    <script src="require.js" type="text/javascript"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js" type="text/javascript"></script>
     <meta name="author" content="Mike Vollmer, http://recurial.com">
     <title>simplescheme.js</title>
     
-    <script type="text/javascript">
-$(function() {
-  var change_code = function(s) { editor.setValue(s); }
-  $.get("samples/default.scm", change_code);
-  $('#input').submit(function(e) {
-    var input_text = $('#input_text').val()
-    var output_array = parse(input_text);
-    var output_text = '';
-    $.each(output_array, function(index, value) {
-      output_text += value + "<br>";
-    });
-    $('#output').html(output_text);
-    e.preventDefault();
-    return false;
-  });
-  $("#Samples").change(function() {
-	var selected = $("#Samples").val();
-    var file = "samples/" + ($("#Samples option:selected").text() + ".scm").toLowerCase();
-    $.get(file, change_code);
-  });
-});
-    </script>
+    <script src="browser.js" type="text/javascript"></script>
     <script type="text/javascript">
 
   var _gaq = _gaq || [];
