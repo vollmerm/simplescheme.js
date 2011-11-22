@@ -3,55 +3,61 @@
 // URL: http://rick.measham.id.au/javascript/hash.htm
 // LICENSE: GPL or same terms as Perl
 
-function Hash(){
-  for( var i=0; i < arguments.length; i++ )
-    for( n in arguments[i] )
-      if( arguments[i].hasOwnProperty(n) )
-        this[n] = arguments[i][n];
-}
-// Hash.version = 1.00; // Original version
-// Hash.version = 1.01; // Added ability to initialize in the constructor
-// Hash.version = 1.02; // Fixed document bug that showed a non-working example (thanks mareks)
-//Hash.version = 1.03;  // Removed returning this from the constructor (thanks em-dash)
-Hash.version = 1.04;  // Missed some 'var' declarations (thanks Twey)
+exports.Hash = (function(){
 
-Hash.prototype = new Object();
+  function Hash(){
+    for( var i=0; i < arguments.length; i++ )
+      for( n in arguments[i] )
+        if( arguments[i].hasOwnProperty(n) )
+          this[n] = arguments[i][n];
+  }
+  // Hash.version = 1.00; // Original version
+  // Hash.version = 1.01; // Added ability to initialize in the constructor
+  // Hash.version = 1.02; // Fixed document bug that showed a non-working example (thanks mareks)
+  //Hash.version = 1.03;  // Removed returning this from the constructor (thanks em-dash)
+  Hash.version = 1.04;  // Missed some 'var' declarations (thanks Twey)
 
-Hash.prototype.keys = function(){
-  var rv = [];
-  for( var n in this )
-    if( this.hasOwnProperty(n) )
-      rv.push(n);
-  return rv;
-}
+  Hash.prototype = new Object();
 
-Hash.prototype.length = function(){
-  return this.keys().length();
-}
+  Hash.prototype.keys = function(){
+    var rv = [];
+    for( var n in this )
+      if( this.hasOwnProperty(n) )
+        rv.push(n);
+    return rv;
+  }
 
-Hash.prototype.values = function(){
-  var rv = [];
-  for( var n in this )
-    if( this.hasOwnProperty(n) )
-      rv.push(this[n]);
-  return rv;
-}
+  Hash.prototype.length = function(){
+    return this.keys().length();
+  }
 
-Hash.prototype.slice = function(){
-  var rv = [];
-  for( var i = 0; i < arguments.length; i++ )
-    rv.push(
-      ( this.hasOwnProperty( arguments[i] ) )
-        ? this[arguments[i]]
-        : undefined
-    );
-  return rv;
-}
+  Hash.prototype.values = function(){
+    var rv = [];
+    for( var n in this )
+      if( this.hasOwnProperty(n) )
+        rv.push(this[n]);
+    return rv;
+  }
 
-Hash.prototype.concat = function(){
-  for( var i = 0; i < arguments.length; i++ )
-    for( var n in arguments[i] )
-      if( arguments[i].hasOwnProperty(n) )
-        this[n] = arguments[i][n];
-  return this;
-}
+  Hash.prototype.slice = function(){
+    var rv = [];
+    for( var i = 0; i < arguments.length; i++ )
+      rv.push(
+        ( this.hasOwnProperty( arguments[i] ) )
+          ? this[arguments[i]]
+          : undefined
+      );
+    return rv;
+  }
+
+  Hash.prototype.concat = function(){
+    for( var i = 0; i < arguments.length; i++ )
+      for( var n in arguments[i] )
+        if( arguments[i].hasOwnProperty(n) )
+          this[n] = arguments[i][n];
+    return this;
+  }
+
+  return Hash;
+
+}());

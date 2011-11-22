@@ -1,0 +1,22 @@
+exports.test = function() {
+  var scheme = require('./simplescheme.js').SScheme;
+  console.log(scheme);
+  console.log(scheme.parse('(+ 1 2)'));
+  console.log(scheme.parse('(+ 1 (* 4 5))'));
+  console.log(scheme.parse('(define a 2) (- a 1)'));
+  console.log(scheme.parse('(define a 5) (display 5)'));
+  console.log(scheme.parse('(display "test")'));
+  console.log(scheme.parse('(define (subfive n) (- n 5)) (subfive 6)'));
+  console.log("non-tail version:");
+  var startTime = new Date();
+  console.log(scheme.parse('(define (fact n) (if (<= n 1) 1 (* n (fact (- n 1))))) (fact 20)'));
+  var endTime = new Date();
+  var timea = endTime.getTime() - startTime.getTime();
+  console.log("Time: " + timea);
+  startTime = new Date();
+  console.log(scheme.parse('(define (facthelp i prod) (if (= i 1) prod (facthelp (- i 1) (* i prod)))) (facthelp 20 1)'));
+  endTime = new Date();
+  var timeb = endTime.getTime() - startTime.getTime();
+  console.log("Time: " + timeb);
+  console.log(timea - timeb);
+};
