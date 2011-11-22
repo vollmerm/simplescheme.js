@@ -39,6 +39,9 @@ exports.SScheme = (function(){
   // some primitive functions for testing
   var set_root = function set_root()
   {
+    // I need to fix all these functions to properly handle types
+    // They currently don't recieve typed objects but are expected to
+    // return them. That's probably a bad idea in the long run.
     root_env = new Context();
     root_env.add('+', function(x,y) { return new_float(x+y); });
     root_env.add('-', function(x,y) { return new_float(x-y); });
@@ -303,6 +306,8 @@ exports.SScheme = (function(){
     }
     else if (x[0] == 'display')
     {
+      // I don't need display or newline inside the eval. Sometime soon I'll get
+      // around to moving them out and into functions of their own.
       if (x.slice(1).length > 1) throw "display takes one argument";
       if (is_typed_object(x[1]))
       {
@@ -318,6 +323,7 @@ exports.SScheme = (function(){
     }
     else if (x[0] == 'newline')
     {
+      // see above comment for display
       if (x.slice(1) > 1) throw "newline takes no arguments";
       else display_outputs.push("\n");
       return null;
@@ -325,21 +331,21 @@ exports.SScheme = (function(){
     else
     {
       // calling a procedure!
-      var evaluated_elements;
+      var evaluated_elements = new Array(x.length);
 
       if (x.length > 1 && typeof(x) == "object")
       {
         // first check for tail call
         if (caller && x[0] == caller)
         {
-          evaluated_elements = new Array(x.length);
+          // I could probably clean this section up a bit...
+          // the two branches have very similar loops
           for (var j = 0; j < x.length; j++)
           {
             evaluated_elements[j] = eval_l(x[j],env);
           }
           return new Tail_call(evaluated_elements[0],evaluated_elements.slice(1));
         } else {
-          evaluated_elements = new Array(x.length);
           for (var j = 0; j < x.length; j++) // eval each item in list
           {
             evaluated_elements[j] = eval_l(x[j],env,null);
@@ -408,10 +414,11 @@ exports.SScheme = (function(){
       while (exp_stack.length > 0)
       {
         current_exp = exp_stack.pop();
-        //print_exp(current_exp);
         ret = eval_l(current_exp,env,caller);
         while (is_tail_call_indicator(ret))
         {
+          // keep calling this (tail-recursive) function until we hit
+          // the termination case
           ret = ret.func.apply(null,ret.ops);
         }
       }
