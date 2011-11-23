@@ -39,30 +39,53 @@ Comments (anything from a ; to the end of a line) are removed by the parser.
 Implementation details
 ----------------------
 
-simplescheme.js is primarily built around a single eval() function. It takes two parameters: an expression (in the form of a Javascript array) and an environment (in the form of a Context object). Context objects use a hash table for local values and variables, and a linked list containing its parent(s). This way, an attempt to look up a given value will first check the immediate or local context, then check the one directly above it, and so on, all the way back down to the global context.
+### eval
 
+<<<<<<< HEAD
 Javascript supports higher order functions, which greatly simplified the implementation of lisp's lambda functions. To create a lambda function, I created a Javascript function that defined a new context (where the arguments are mapped to the function signature's parameters and added to the local context) and passes it to eval along with its expression.
+=======
+simplescheme.js is primarily built around a single eval() function. It takes three parameters: an expression (in the form of a Javascript array), an environment (in the form of a Context object), and, optionally, the name of the function it is currently executing (see the section on tail recursion).
+>>>>>>> 273981ed87fa3d0eb4f99fa2303ca636aa8f17e7
 
-Eval has a few base cases (if statement, define, lambda, value, etc). If none of these are the case, then it assumes that the expression is in the form of (function *parameters) and attempts to call it. If you get a weird Javascript error about apply not being a valid function, it's probably because you passed a list to eval that it didn't understand, so it tried to call the first element as a function.
+Eval has a few base cases (if, cond, define, lambda, etc). If none of these are the case, then it assumes that the expression is in the form of (function *parameters) and attempts to call it.
 
-To build the context objects I used an [existing hash table script](http://rick.measham.id.au/javascript/hash.htm). It's very simple and elegent, and it's open source, so I decided to use it rather than implement my own. I also used [CodeMirror](http://codemirror.net/) for the syntax coloring in the editor.
+### environment
+
+Context objects use a hash table for local values and variables, and a linked list containing its parent(s). This way, an attempt to look up a given value will first check the immediate or local context, then check the one directly above it, and so on, all the way back down to the global context.
+
+### lambda
+
+Javascript supports higher order functions, which somewhat simplified the implementation of LISP's lambda functions (though Javascript does not support tail recursion, which became an obstacle). To create a lambda function, I created a Javascript function that defined a new context (where the arguments are mapped to the function signature's parameters and added to the local context) and passes it to eval along with the expression(s) contained in the function. 
+
+### tail recursion
+
+My first attempts at optimizing tail calls into loops involved attempting to detect it beforehand in the code and change it directly into a while loop. Eventually, it occured to me that the best way to detect tail recursion is to run the function.
+
+This approach was complicated by the way I implemented eval. It recursively calls itself quite often, so it might not be able to determine if a given function name it runs into is the same as the one that originally called it (for example, if eval is in the middle of evaluating an if statement). The way I decided to solve this problem was to have a third optional parameter for eval that contains the name of the calling function. That way, the name of the function persists through the recursive calls.
+
+I have a central while loop that loops over a list of expressions to run, popping each off and passing them to eval one-by-one. If eval detects a tail call in the method described above, it will (rather than running it) return a special token that contains the new parameters for the function. This is returned all the way down the stack to the loop and another function call with the new parameters is pushed into the list of expressions so that it will be the next one executed by the while loop. This effectively runs the functions in sequence rather than nesting them, and it also takes care of the terminating condition automatically (a function's base case won't trigger eval's special case for tail calls).
+
 
 Progress
 --------
 
-While it's usable, a lot is missing from the interpreter in its current state. Currently there is only very basic error checking. Numbers and strings are the only supported types.
+It's definitely pre-beta quality software. I've been rapidly changing/adding features, so at any given point something might be broken. At the very least I try to make sure the built-in test scripts all work.
 
-Most basic Scheme functions are implemented: car, cdr, cons, list, if, cond, define, lambda, null?, and so on. A few math functions are included (stuff like cos, sin, sqrt). See the source for a complete list.
+Most basic Scheme functions are implemented: car, cdr, cons, list, if, cond, define, lambda, null?, and so on. A few math functions are included (stuff like cos, sin, sqrt). It also supports the display function, which currently prints to a special display buffer object that is printed in the output of parse(). See the source for a complete list of the built-in functions.
 
-Also, it's a bit buggy. It hasn't been very thoroughly tested so far.
+I've started trying to integrate it with node.js, which I have almost no familiarity with. To make this eaiser I've adopted the CommonJS module pattern.
 
 Extending
 ---------
 
 Adding new primitive functions is fairly simple -- javascript functions can be inserted directly into the global scope by calling root_env.add(name,function).
 
+In the future I plan to have a more extensive system for adding functions from outside.
+
 Sources
 -------
+
+To build the context objects I used an [existing hash table script](http://rick.measham.id.au/javascript/hash.htm). It's very simple and elegent, and it's open source, so I decided to use it rather than implement my own. I also used [CodeMirror](http://codemirror.net/) for the syntax coloring in the editor.
 
 These sources were useful to me while implementing simplescheme.js.
 
