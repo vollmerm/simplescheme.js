@@ -2,7 +2,7 @@ var spath = "node_modules/sscheme/";
 $(function() {
   require.load([spath+'hash.js',spath+'simplescheme.js'], function(err) {
     if (err) alert(err);
-    var scheme = require(spath+'simplescheme').SScheme;
+    var scheme = require(spath+'simplescheme');
     var change_code = function(s) { editor.setValue(s); }
     $.get("samples/default.scm", change_code);
     $('#input').submit(function(e) {

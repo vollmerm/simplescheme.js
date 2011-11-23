@@ -4,7 +4,6 @@
   "description": "A simple Lisp interpreter written in Javascript.",
   "homepage": "https://github.com/probabilityZero/simplescheme.js",
   "author": "Mike Vollmer <mike@talkingincircles.net>",
-  "main":"./simplescheme.js",
-  "bin":"./repl.js",
+  "main":"./lib/simplescheme.js",
   "private": true
 }
