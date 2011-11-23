@@ -1,11 +1,26 @@
 // Requires
 var util = require('util'),
     exec = require('child_process').exec,
+    fs = require('fs'),
+    stitch = require('stitch'),
     child;
 
 desc('Default task.');
 task('default',[], function(params){
   console.log('This is the default task.');
+});
+
+desc('Compile package for browser');
+task('browser',[],function(params){
+  var package = stitch.createPackage({
+    paths: [__dirname + '/lib']
+  });
+  package.compile(function (err, source){
+  fs.writeFile('sscheme_browser.js', source, function (err) {
+    if (err) throw err;
+    console.log('Compiled package.js');
+  })
+})
 });
 
 namespace('test', function() {

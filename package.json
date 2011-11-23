@@ -1,5 +1,5 @@
 {
-  "name": "SimpleScheme",
+  "name": "simplescheme.js",
   "version": "v0.1",
   "description": "A simple Lisp interpreter written in Javascript.",
   "homepage": "https://github.com/probabilityZero/simplescheme.js",
