@@ -41,11 +41,7 @@ Implementation details
 
 ### eval
 
-<<<<<<< HEAD
-Javascript supports higher order functions, which greatly simplified the implementation of lisp's lambda functions. To create a lambda function, I created a Javascript function that defined a new context (where the arguments are mapped to the function signature's parameters and added to the local context) and passes it to eval along with its expression.
-=======
 simplescheme.js is primarily built around a single eval() function. It takes three parameters: an expression (in the form of a Javascript array), an environment (in the form of a Context object), and, optionally, the name of the function it is currently executing (see the section on tail recursion).
->>>>>>> 273981ed87fa3d0eb4f99fa2303ca636aa8f17e7
 
 Eval has a few base cases (if, cond, define, lambda, etc). If none of these are the case, then it assumes that the expression is in the form of (function *parameters) and attempts to call it.
 
