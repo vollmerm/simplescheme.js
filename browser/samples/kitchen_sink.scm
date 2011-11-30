@@ -49,9 +49,6 @@
 
 (list 1 2 3) ; list accepts n arguments
 
-; quote can make symbols
-(quote the end of the world)
-
 ; cond is transformed into a nested if
 (cond ((= 1 2) (quote nope))
       ((= 1 1) (quote yes)))
