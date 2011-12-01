@@ -81,7 +81,7 @@ In the future I plan to have a more extensive system for adding functions from o
 Sources
 -------
 
-To build the context objects I used an [existing hash table script](http://rick.measham.id.au/javascript/hash.htm). It's very simple and elegent, and it's open source, so I decided to use it rather than implement my own. I also used [CodeMirror](http://codemirror.net/) for the syntax coloring in the editor.
+To build the context objects I used an [existing hash table script](http://rick.measham.id.au/javascript/hash.htm), and for the number handling and arithmetic I used the [js-numbers](https://github.com/dyoo/js-numbers) library. I also used [CodeMirror](http://codemirror.net/) for the syntax coloring in the editor.
 
 These sources were useful to me while implementing simplescheme.js.
 
