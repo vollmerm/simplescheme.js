@@ -15,5 +15,12 @@ exports.test_define = function(test) {
 
 exports.test_display = function(test) {
   test.equal(scheme.parse('(display "test")')[0],'test',"Display a string");
+  test.equal(scheme.parse('(newline)')[0],'\n',"Newline");
+  test.done();
+};
+
+exports.test_map = function(test) {
+  var tlist = scheme.parse("(define (map-func proc lis) (cond ((null? lis) '()) (#t (cons (proc (car lis)) (map-func proc (cdr lis)))))) (define (square x) (* x x)) (map-func square '(2 3 4))");
+  test.equal(tlist[0],'4, 9, 16');
   test.done();
 };
