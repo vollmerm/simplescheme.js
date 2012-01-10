@@ -5,11 +5,7 @@ $(function() {
   $.get("samples/default.scm", change_code);
   $('#input').submit(function(e) {
     var input_text = $('#input_text').val()
-    var output_array = scheme.parse(input_text);
-    var output_text = '';
-    $.each(output_array, function(index, value) {
-      output_text += value + "<br>";
-    });
+    var output_text = scheme.parse(input_text);
     $('#output').html(output_text);
     e.preventDefault();
     return false;
