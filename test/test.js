@@ -32,3 +32,11 @@ exports.test_closure = function(test) {
   test.equal(scheme.parse(defs + use,true),'(6)(7)');
   test.done();
 };
+
+exports.test_hanoi = function(test) {
+  var s1 = "(define (disp F T)(display \"move ring from \") (display F) (display \" to \")  (display T)  (newline))";
+  var s2 = "(define (hanoi rings F T U) (if (>= 0 rings) rings (begin (hanoi (- rings 1) F U T) (disp F T)(hanoi (- rings 1) U T F))))";
+  var s3 = "(hanoi 3 \"a\" \"b\" \"c\")";
+  test.ok(scheme.parse(s1+s2+s3,true),"Testing Hanoi");
+  test.done();
+}
