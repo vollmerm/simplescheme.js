@@ -10,6 +10,7 @@ exports.test_define = function(test) {
   test.equal(scheme.parse('(define a 2) (- a 1)',true),'(1)',"Define value");
   test.equal(scheme.parse('(define (fact n) (if (<= n 1) 1 (* n (fact (- n 1)))))(fact 10)',true),'(3628800)',"Define and run function");
   test.equal(scheme.parse('(define (facthelp i prod) (if (= i 1) prod (facthelp (- i 1) (* i prod)))) (facthelp 10 1)',true),'(3628800)',"Tail function");
+  test.equal(scheme.parse('(define (tail_factorial i) (define (facthelp i prod)(if (= i 1) prod (facthelp (- i 1) (* i prod)))) (facthelp i 1)) (tail_factorial 10)',true),'(3628800)',"Tail function");
   test.done();
 };
 
