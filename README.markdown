@@ -1,14 +1,14 @@
 simplescheme.js
 ===============
 
-This is a very simple lisp interpreter implemented in Javascript. I started working on this for fun and to help me study for my programming languages class.
+This is a very simple (Scheme-like) Lisp interpreter implemented in Javascript. I started working on this for fun and to help me study for my programming languages class.
 
 You can demo the interpreter with this [rudimentary web interface](http://gaia.ecs.csus.edu/~vollmerm/simplescheme.js/).
 
 Usage
 -----
 
-Pass lisp code to the parse() function to eval it, or pass lisp-like code in Javascript array form to the eval function directly.
+Pass lisp code to the parse() function to eval it. A string containing s-expressions is returned.
 
 So this:
 
@@ -17,23 +17,15 @@ So this:
   (if (<= n 1) 1
       (* n (fact (- n 1)))))
 
-(fact 10) ; 3628800
+(fact 10) ; (3628800)
 ```
 
 Becomes this:
 
 ```javascript
 parse('(define (fact n) (if (<= n 1) 1 (* n (fact (- n 1)))))(fact 10)');
-// 3629900
+// (3629900)
 ```
-
-And Javascript arrays can be eval'd directly:
-
-```javascript
-eval_l(['+',1,['*',3,4]]);
-// 13
-```
-
 Comments (anything from a ; to the end of a line) are removed by the parser.
 
 Implementation details
