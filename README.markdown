@@ -17,14 +17,14 @@ So this:
   (if (<= n 1) 1
       (* n (fact (- n 1)))))
 
-(fact 10) ; (3628800)
+(fact 10) ; 3628800
 ```
 
 Becomes this:
 
 ```javascript
 parse('(define (fact n) (if (<= n 1) 1 (* n (fact (- n 1)))))(fact 10)');
-// (3629900)
+// '3629900'
 ```
 Comments (anything from a ; to the end of a line) are removed by the parser.
 
@@ -33,7 +33,7 @@ Implementation details
 
 ### eval
 
-simplescheme.js is primarily built around a single eval() function. It takes three parameters: an expression (in the form of a Javascript array), an environment (in the form of a Context object), and, optionally, the name of the function it is currently executing (see the section on tail recursion).
+simplescheme.js is primarily built around a single eval() function. It takes two parameters: an expression (in the form of a Javascript array) and an environment (in the form of a Context object).
 
 Eval has a few base cases (if, cond, define, lambda, etc). If none of these are the case, then it assumes that the expression is in the form of (function *parameters) and attempts to call it.
 
@@ -43,21 +43,18 @@ Context objects use a hash table for local values and variables, and a linked li
 
 ### lambda
 
-Javascript supports higher order functions, which somewhat simplified the implementation of LISP's lambda functions (though Javascript does not support tail recursion, which became an obstacle). To create a lambda function, I created a Javascript function that defined a new context (where the arguments are mapped to the function signature's parameters and added to the local context) and passes it to eval along with the expression(s) contained in the function. 
+Although Javascript supports anonymous functions that resemble lambda functions, I ended up defining a new object type for lambda functions. In order to implement tail recursion (see below), I needed access to the expression and argument list of the function, which would have been abstracted away if I relied (as I originally did) on Javascript function objects.
 
 ### tail recursion
 
-My first attempts at optimizing tail calls into loops involved attempting to detect it beforehand in the code and change it directly into a while loop. Eventually, it occured to me that the best way to detect tail recursion is to run the function.
+Tail recursion in the interpreter is done with a while(true) loop in eval. Rather than recursively calling eval, the current expression (x, or the first parameter of eval) is modified, and then the loop iterates again with the new value of x. So, to support tail recursion (and tail call optimization in general), x and env can be changed inside the function. Because eval is not called recursively in these cases, the stack does not grow.
 
-This approach was complicated by the way I implemented eval. It recursively calls itself quite often, so it might not be able to determine if a given function name it runs into is the same as the one that originally called it (for example, if eval is in the middle of evaluating an if statement). The way I decided to solve this problem was to have a third optional parameter for eval that contains the name of the calling function. That way, the name of the function persists through the recursive calls.
-
-I have a central while loop that loops over a list of expressions to run, popping each off and passing them to eval one-by-one. If eval detects a tail call in the method described above, it will (rather than running it) return a special token that contains the new parameters for the function. This is returned all the way down the stack to the loop and another function call with the new parameters is pushed into the list of expressions so that it will be the next one executed by the while loop. This effectively runs the functions in sequence rather than nesting them, and it also takes care of the terminating condition automatically (a function's base case won't trigger eval's special case for tail calls).
-
+I based my implementation of tail recursion on [Peter Norvig's lis.py](http://norvig.com/lispy2.html).
 
 Progress
 --------
 
-It's definitely pre-beta quality software. I've been rapidly changing/adding features, so at any given point something might be broken. At the very least I try to make sure the built-in test scripts all work.
+This is definitely beta quality software. I've been changing/adding/removing code pretty rapidly while working on it, and my testing isn't as thorough as it should be. Nonetheless, the core features are reasonably complete and the interpreter is definitely useable in its current state.
 
 Most basic Scheme functions are implemented: car, cdr, cons, list, if, cond, define, lambda, null?, and so on. A few math functions are included (stuff like cos, sin, sqrt). It also supports the display function, which currently prints to a special display buffer object that is printed in the output of parse(). See the source for a complete list of the built-in functions.
 
