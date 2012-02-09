@@ -7,7 +7,7 @@ var util = require('util'),
 
 desc('Default task.');
 task('default',[], function(params){
-  console.log('This is the default task.');
+  console.log('This is the default task. Run jake browser to generate file.');
 });
 
 desc('Compile package for browser');
@@ -18,7 +18,7 @@ task('browser',[],function(params){
   package.compile(function (err, source){
   fs.writeFile('sscheme_browser.js', source, function (err) {
     if (err) throw err;
-    console.log('Compiled package.js');
+    console.log('Compiled sscheme_browser.js');
   })
 })
 });
